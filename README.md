@@ -19,10 +19,10 @@ propose a system for a science problem, for example.)
 
 | Name                            | Responsible for | Link to team members' commits in this repo |
 |---------------------------------|-----------------|------------------------------------|
-| Preetham Rakshith Prakash    |   Continuous X              |   https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=th-blitz                                 |
-| Riya Garg                  |    Data pipeline             |    https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=riyagarg30                                |
-| Pranav Bhatt                 | Model serving and monitoring platforms                 |    https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=pranav-bhatt                                |
-| Yugesh Panta |     Model training and training platforms            |    https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=Yugesh1620             |
+| Preetham Rakshith Prakash | Continuous X | https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=th-blitz |
+| Riya Garg | Data pipeline | https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=riyagarg30 |
+| Pranav Bhatt | Model serving and monitoring platforms | https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=pranav-bhatt |
+| Yugesh Panta | Model training and training platforms | https://github.com/Yugesh1620/Neura-Scholar/commits/main/?author=Yugesh1620 |
 
 
 
@@ -42,9 +42,9 @@ conditions under which it may be used. -->
 
 |              | How it was created | Conditions of use |
 |--------------|--------------------|-------------------|
-| arXiv Dataset (PDFs) | [From arXiv's bulk access API](https://info.arxiv.org/help/bulk_data/index.html) | [arxiv's nonexclusive-distrib/1.0 license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html) for individual papers
-| arXiv Dataset (Metadata) | [From arXiv's kaggle dataset](https://www.kaggle.com/datasets/Cornell-University/arxiv) | [Creative Commons CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0) for the metadata
-| Script to generate utf-8 encoded plain Text from arXiv PDFs | A third party script called [mattbierbaum/arxiv-public-datasets](https://github.com/mattbierbaum/arxiv-public-datasets) to pull in arXiv Dataset in bulk from arXiv's bulk access API or Google bucket or AWS bucket and to generate plain text | [MIT License](https://github.com/mattbierbaum/arxiv-public-datasets/blob/master/LICENSE) |
+| arXiv Dataset (PDFs) | [From arXiv's bulk access API](https://info.arxiv.org/help/bulk_data/index.html) | [arxiv's nonexclusive-distrib/1.0 license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html) for most individual papers, unknown for the rest
+| arXiv Dataset (Metadata) | [From arXiv's kaggle dataset](https://www.kaggle.com/datasets/Cornell-University/arxiv) | [Creative Commons CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0) for the metadata only
+| Script to pull in arXiv PDFs in bulk | A third party script called [mattbierbaum/arxiv-public-datasets](https://github.com/mattbierbaum/arxiv-public-datasets) to pull in arXiv Dataset in bulk from arXiv's bulk access API or Google bucket or AWS bucket and to generate plain text | [MIT License](https://github.com/mattbierbaum/arxiv-public-datasets/blob/master/LICENSE) |
 | Base Embed Model | [Linq-AI-Research/Linq-Embed-Mistral](https://huggingface.co/Linq-AI-Research/Linq-Embed-Mistral) | Creative Commons Attribution Non Commercial 4.0 |
 | BART (facebook/bart-large-cnn or philschmid/bart-large-cnn-samsum) | Pretrained by Facebook on CNN/DailyMail and/or SAMSum datasets, a Large language model with encoder-decoder structure. Hosted on [huggingface](https://huggingface.co/facebook/bart-large). | MIT License (Samsum variant) or Fairseq license for BART. Free for research use. |
 | etc          | | |
@@ -58,11 +58,11 @@ The table below shows an example, it is not a recommendation. -->
 
 | Requirement     | How many/when                                     | Justification |
 |-----------------|---------------------------------------------------|---------------|
-| `m1.medium` VMs | 1 for the entire project duration, 2 more during final setup | For hosting 1 conventional DB, 1 vector DB and 1 as a proxy |
-| `compute_liqid` node with 2 GPUs OR `gpu_mi100` node with 2 GPUs | 1 node with 2 a100s for 20 hours a week ( 2x 4 hour blocks and 2x 6 hour blocks a week ) | For training and serving models |
-| `compute_liqid` or `gpu_mi100` node with 1 GPU | For the entire project duration | For training and serving models |
+| `m1.medium` VMs | 1 for the entire project duration, 2 more during final setup | For hosting a 1 conventional DB, 1 for a vector DB and 1 as a proxy |
+| `compute_liqid` node with 2 GPUs OR `gpu_mi100` node with 2 GPUs | 1 node with 2 a100s for 20 hours a week ( 2x 4 hour blocks and 2x 6 hour blocks a week ) | Hosting a Ray cluster for training and serving models |
+| `compute_liqid` or `gpu_mi100` or `rtx8000` node with 1 GPU | For the entire project duration | For training and serving models under development |
 | Persistent Storage | 120 GB for entire project duration | Needed to persist models, database, training datasets, metrics etc |
-| Floating IPs | 2 for entire project duration | 1 for everything ( gateway, dashboards etc ), and 1 as a backup |
+| Floating IPs | 1 for entire project duration | 1 for everything ( gateway, dashboards etc ) |
 
 <!--
 | `m1.medium` VMs | 3 for entire project duration                     | ...           |
