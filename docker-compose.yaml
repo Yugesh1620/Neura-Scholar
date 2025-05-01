@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    container_name: meta_data_postgres
+    image: ankane/pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rg5073
+      POSTGRES_PASSWORD: rg5073pass
+      POSTGRES_DB: meta_data_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - /mnt/block/volumes:/var/lib/postgresql/data
+      - /mnt/object/metadata:/csvfiles
+
+  jupyter:
+    image: quay.io/jupyter/pytorch-notebook:pytorch-2.5.1
+    container_name: jupyter
+    user: root
+    ports:
+      - "8888:8888"
+    shm_size: 8g
+    environment:
+      - META_DATA_DIR=/mnt/meta-data
+    volumes:
+      - /mnt/block/training:/home/jovyan/work/
+      - type: bind
+        source: /mnt/object
+        target: /mnt/meta-data
+        read_only: true
+    command: >
+      bash -c "python3 -m pip install psycopg2-binary && start-notebook.sh"
