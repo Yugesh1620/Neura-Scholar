@@ -1,6 +1,7 @@
 transformers
 fastapi
-pydantic
+prometheus-fastapi-instrumentator
+pydantic-settings
 sentence_transformers
 uvicorn
 huggingface_hub
