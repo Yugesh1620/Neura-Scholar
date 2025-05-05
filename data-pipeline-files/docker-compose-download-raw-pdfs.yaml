@@ -1,0 +1,107 @@
+version: '3.8'
+name: extract-raw-pdfs
+
+volumes:
+  project-22-raw-pdfs:
+
+services:
+  extract-data:
+    container_name: etl_extract_data
+    image: python:3.11
+    user: root
+    volumes:
+      - project-22-raw-pdfs:/data
+    working_dir: /data
+    command:
+      - bash
+      - -c
+      - |
+        set -e
+        apt-get update && apt-get install -y curl unzip python3-openssl \
+        && curl https://sdk.cloud.google.com | bash
+        source /root/google-cloud-sdk/path.bash.inc
+        echo "Reset & prepare workspace…"
+        rm -rf project-22-pdf-data
+        mkdir -p project-22-pdf-data
+        cd project-22-pdf-data
+
+        echo "Listing all PDF prefixes from GCS…"
+        gsutil ls gs://arxiv-dataset/arxiv/arxiv/pdf > files_list.txt
+
+        echo "Extract complete: see files_list.txt"
+      
+  process-data:
+  #combines transform and load step for our kind of data
+    container_name: etl_process_data
+    image: rclone/rclone:latest
+    user: root
+    depends_on:
+      - extract-data
+    environment:
+      - RCLONE_CONTAINER=${RCLONE_CONTAINER}
+    volumes:
+      - project-22-raw-pdfs:/data
+      - ~/.config/rclone/rclone.conf:/root/.config/rclone/rclone.conf:ro
+    working_dir: /data/project-22-pdf-data
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+
+        apt-get update && apt-get install -y curl unzip python3-openssl \
+        && curl https://sdk.cloud.google.com | bash
+        source /root/google-cloud-sdk/path.bash.inc
+
+        # if [ -z "$RCLONE_CONTAINER" ]; then
+        #   echo "ERROR: RCLONE_CONTAINER is not set"
+        # exit 1
+        # fi
+
+        #echo "Ensure remote folder exists: raw-pdf-data"
+        #rclone mkdir -p chi_tacc:"$RCLONE_CONTAINER/raw-data" || true
+
+        echo "Starting per‑prefix ETL…"
+        # set threshold: 15 GiB in bytes
+        max_bytes=$((15 * 1024**3))
+        total_bytes=0
+
+        while read -r prefix_uri; do
+
+          echo "$${prefix_uri}"
+          prefix=$(basename "$${prefix_uri%/}")
+          echo "$${prefix}"
+
+          # # download PDFs
+          echo "Downloading pdfs at $${prefix_uri}"
+          gsutil -m cp -r "$${prefix_uri}" .
+
+          echo "Creating tar file"
+          # create the tarball
+          tar cvf "arxiv_$${prefix}".tar "$${prefix}"
+
+          # # measure its size (portable via wc)
+          size=$(wc -c < "arxiv_$${prefix}".tar)
+          echo "File size: $${size}"
+
+          # # check if we’d go over the limit
+          # if (( total_bytes + size > max_bytes )); then
+          #   echo "Reached 110 GiB limit (current total: $((total_bytes/1024**3)) GiB, next file: $((size/1024**3)) GiB)."
+          #   # clean up this prefix and exit
+          #   rm -rf "$name" "$name".tar
+          #   break
+          # fi
+
+          # # update running total
+          # total_bytes=$((total_bytes + size))
+          # echo " → Uploading $name.tar.gz (size: $((size/1024**3)) GiB)…"
+
+          # # push and then delete locally
+          # rclone copy "$name".tar.gz chi_tacc:"$RCLONE_CONTAINER/raw-data" \
+          #   --progress --transfers=16 --checkers=8 --fast-list
+          rm -rf "arxiv_$${prefix}".tar "$${prefix}"
+
+          # echo " ✔ Done $name (freed space). Total uploaded: $((total_bytes/1024**3)) GiB."
+        done < files_list.txt
+
+        echo "✔ All prefixes processed!"

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    container_name: meta_data_postgres
+    image: ankane/pgvector  # or postgres:14 if you want (see earlier messages)
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rg5073
+      POSTGRES_PASSWORD: rg5073pass
+      POSTGRES_DB: meta_data_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - /mnt/block/volumes:/var/lib/postgresql/data  # <-- bind to your /mnt/block/volumes
+      - /mnt/object/metadata:/csvfiles
+
+# No docker volume declaration needed here because you're manually binding.
